@@ -1,0 +1,8 @@
+{
+	"backendBaseUrl": "http://localhost:5001",
+	"getUsersEndpoint": "record/userslist",
+	"checkEndpoint": "record/check",
+	"updateUserEndpoint": "users/{userId}",
+	"deleteEndpoint": "{usernameToDelete}",
+	"addUserEndpoint": "record/add"
+}

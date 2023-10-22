@@ -1,0 +1,67 @@
+.form-group input.form-control { 
+  margin: 5px;
+  width: 70%; 
+}
+
+.App {
+  margin: 3%;
+}
+
+.registration_container {
+border-radius: 14px;
+background-color: rgb(165, 204, 255);
+padding: 3%;
+}
+
+.autentification_container {
+margin-bottom: 20px;
+border-radius: 14px;
+background-color: rgb(161, 224, 249);
+padding: 3%;
+
+}
+.breadcrumb_custom {
+  display: flex;
+    flex-direction: row;
+    flex-wrap: nowrap;
+    gap: 5%;
+    justify-content: flex-end;
+}
+
+.breadcrumb_hello {
+  margin-top: revert;
+}
+
+.action_toolbar{
+  display: flex;
+  flex-direction: row;
+  gap: 5%;
+  margin-left:4%;
+}
+.icon{
+  cursor: pointer;
+  width: 40px;
+}
+
+.lizard {
+  position: absolute;
+  width: 60px;
+}
+.table {
+  margin-top: 5%;
+}
+
+.checking_container {
+  margin-top: 5%;
+  border: 5px ridge rgb(1, 146, 141);
+  border-radius: 10px;
+  background-color: rgba(161, 255, 203, 0.798);
+  padding: 3%;
+}
+
+.header_custom{
+    margin-bottom: 3%;
+    border-radius: 10px;
+      background-color: #b3eeff;
+    padding: 3%;
+}
