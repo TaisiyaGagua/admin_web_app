@@ -8,7 +8,8 @@ import { UpdateUserDto } from "../dtos/requests/update_user_dto";
 import { CreateUserDto } from "../dtos/requests/create_user_dto";
 import { UserResponseDto } from "../dtos/responses/user_response_dto";
 
-const baseUrl = config.backendBaseUrl;
+const baseUrl = process.env.REACT_APP_BACKEND_URL;
+
 const headers: RawAxiosRequestHeaders | AxiosHeaders = {
     Accept: "application/json",
 };
