@@ -1,5 +1,5 @@
-export type User = {
-    id: string;
+export type UserResponseDto = {
+    _id: string;
     username: string;
     email: string;
     lastLogin: Date;

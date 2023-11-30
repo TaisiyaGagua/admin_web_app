@@ -1,5 +1,4 @@
-export type User = {
-    id: string;
+export type CreateUserDto = {
     username: string;
     email: string;
     lastLogin: Date;

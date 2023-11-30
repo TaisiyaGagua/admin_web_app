@@ -1,7 +1,8 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router";
-import { createUser } from "../services/api_client";
+import { createUserAsync } from "../services/api_client";
 import { User } from "../dtos/user";
+import { CreateUserDto } from "../dtos/requests/create_user_dto";
 
 export interface RegistrationFormData {
     username: string;
@@ -10,13 +11,14 @@ export interface RegistrationFormData {
 }
 
 function CreateUserComponent() {
-    const [form, setForm] = useState<User>({
+    const [form, setForm] = useState<CreateUserDto>({
         username: "",
         email: "",
         lastLogin: new Date(),
         password: "",
         status: "Active",
     });
+
     const navigate = useNavigate();
 
     function updateForm(value: Partial<User>) {
@@ -29,17 +31,31 @@ function CreateUserComponent() {
         e.preventDefault();
         const newPerson = { ...form, status: "Active" };
 
-        await createUser(newPerson);
+        try {
+            const response = await createUserAsync(newPerson);
 
-        setForm({
-            username: "",
-            email: "",
-            password: "",
-            lastLogin: new Date(),
-            status: "",
-        });
-        navigate("/authorised");
-        localStorage.setItem("username", `${newPerson.username}`);
+            if (response.data?.insertedId) {
+                setForm({
+                    username: "",
+                    email: "",
+                    password: "",
+                    lastLogin: new Date(),
+                    status: "",
+                });
+
+                navigate("/authorised");
+
+                localStorage.setItem("username", `${newPerson.username}`);
+                localStorage.setItem("currentUserID", response.data.insertedId);
+            } else {
+                console.error(
+                    "Failed to create user:",
+                    response.error || response.data
+                );
+            }
+        } catch (error) {
+            console.error("Error creating user:", error);
+        }
     }
 
     return (

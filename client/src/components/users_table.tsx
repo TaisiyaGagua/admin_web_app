@@ -1,34 +1,56 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { User } from "../dtos/user";
 import { useDispatch, useSelector } from "react-redux";
 import { getUsersRequest } from "../state/users_state";
+import {
+    addSelectedUser,
+    removeSelectedUser,
+    clearSelectedUsers,
+} from "../state/selected_users_state";
 
-interface ShowUsersTableProps {
+interface RootState {
+    users: User[];
     selectedUsers: string[];
-    setSelectedUsers: (users: string[]) => void;
 }
 
-function ShowUsersTable({
-    selectedUsers,
-    setSelectedUsers,
-}: ShowUsersTableProps) {
+function ShowUsersTable() {
     const dispatch = useDispatch();
-    const users: User[] = useSelector((state: any) => state.users);
+    const [selectAll, setSelectAll] = useState(false);
+    const users: User[] = useSelector((state: RootState) => state.users);
+    const selectedUsers: string[] = useSelector(
+        (state: RootState) => state.selectedUsers
+    );
 
     useEffect(() => {
         dispatch(getUsersRequest());
+        dispatch(clearSelectedUsers());
     }, [dispatch]);
 
-    const toggleUserSelection = (username: string) => {
-        // dispatch(blockUsersRequest);
-        if (selectedUsers.includes(username)) {
-            setSelectedUsers(
-                selectedUsers.filter(
-                    (selectedUser) => selectedUser !== username
-                )
-            );
+    const toggleUserSelection = (
+        e: React.ChangeEvent<HTMLInputElement>,
+        id: string
+    ) => {
+        let isChecked = e.target.checked;
+        if (isChecked) {
+            dispatch(addSelectedUser(id));
         } else {
-            setSelectedUsers([...selectedUsers, username]);
+            dispatch(removeSelectedUser(id));
+        }
+    };
+    const toggleSelectAll = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const isChecked = e.target.checked;
+        setSelectAll(isChecked);
+
+        if (isChecked) {
+            users.forEach((user) => {
+                if (!selectedUsers.includes(user.id)) {
+                    dispatch(addSelectedUser(user.id));
+                }
+            });
+        } else {
+            selectedUsers.forEach((userId) => {
+                dispatch(removeSelectedUser(userId));
+            });
         }
     };
 
@@ -37,7 +59,12 @@ function ShowUsersTable({
             <thead>
                 <tr>
                     <th className="bg-info" scope="col">
-                        #
+                        <input
+                            className="form-check-input"
+                            type="checkbox"
+                            checked={selectAll}
+                            onChange={toggleSelectAll}
+                        />
                     </th>
                     <th className="bg-info" scope="col">
                         Name
@@ -60,15 +87,15 @@ function ShowUsersTable({
                             <input
                                 className="form-check-input"
                                 type="checkbox"
-                                checked={selectedUsers.includes(user.username)}
-                                onChange={() =>
-                                    toggleUserSelection(user.username)
+                                checked={selectedUsers.includes(user.id)}
+                                onChange={(e) =>
+                                    toggleUserSelection(e, user.id)
                                 }
                             />
                         </td>
                         <td>{user.username}</td>
                         <td>{user.email}</td>
-                        <td>{user.lastLogin.toUTCString()}</td>
+                        <td>{user.lastLogin?.toUTCString()}</td>
                         <td>{user.status}</td>
                     </tr>
                 ))}

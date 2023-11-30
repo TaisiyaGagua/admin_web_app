@@ -8,6 +8,7 @@ const Header: React.FC = () => {
     const handleLogout = () => {
         navigate("/");
     };
+    const username = localStorage.getItem("username");
 
     return (
         <header>
@@ -15,7 +16,7 @@ const Header: React.FC = () => {
             <div className="breadcrumb_custom">
                 <p className="breadcrumb_hello">
                     Hello,
-                    {localStorage.getItem("username")}!
+                    {username}!
                 </p>
                 <button className="btn btn-info" onClick={handleLogout}>
                     Log out

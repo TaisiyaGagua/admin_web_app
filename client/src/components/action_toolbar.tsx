@@ -1,59 +1,43 @@
-import React, { useEffect, useState } from "react";
+import React from "react";
 import blockLogo from "../images/icon_block.png";
 import unlockLogo from "../images/icon_unlock.png";
 import thrashLogo from "../images/icon_thrash.png";
 import { useDispatch, useSelector } from "react-redux";
-import { User } from "../dtos/user";
-import { blockUsersRequest } from "../state/users_state";
+import {
+    blockUsersRequest,
+    deleteUsersRequest,
+    unblockUsersRequest,
+} from "../state/users_state";
+import { clearSelectedUsers } from "../state/selected_users_state";
+import { useNavigate } from "react-router-dom";
 
-
-interface UserActionsProps {
-    // status: "Active" | "Blocked";
-    selectedUsers: string[];
-}
-
-const UserActions: React.FC<UserActionsProps> = (props: UserActionsProps) => {
-    const [status, setStatus] = useState<string>("Active");
-    const { selectedUsers /*onBlock, onUnlock*/ } = props;
+const UserActions: React.FC = () => {
+    const selectedIds: string[] = useSelector(
+        (state: any) => state.selectedUsers
+    );
+    const currentUserID = localStorage.getItem("currentUserID");
+    const navigate = useNavigate();
     const dispatch = useDispatch();
-    const users: User[] = useSelector((state: any) => state.users);
-
-    useEffect(() => {
-        dispatch(blockUsersRequest());
-    }, [dispatch]);
 
     const handleBlockClick = async () => {
-        for (selectedUsers) {
-            if (status === "Active") {
-                await fetch("http://localhost:5001/users", {
-                    method: "PATCH",
-                    headers: {
-                        "Content-Type": "application/json",
-                    },
-                    body: JSON.stringify(selectedUsers),
-                });
-                console.log("this user has been bloked");
-            }
+        dispatch(blockUsersRequest(selectedIds));
+        dispatch(clearSelectedUsers());
+        if (currentUserID && selectedIds.includes(currentUserID)) {
+            navigate("/");
         }
-        console.log(selectedUsers);
     };
 
     const handleUnlockClick = () => {
-        if (status === "Blocked") {
-            //разблокировать из бд
-            // onUnlock(username);
-        }
+        dispatch(unblockUsersRequest(selectedIds));
+        dispatch(clearSelectedUsers());
     };
 
     const handleDeleteClick = async () => {
-        for (const usernameToDelete of selectedUsers) {
-            await fetch(`http://localhost:5001/${usernameToDelete}`, {
-                method: "DELETE",
-            });
-            console.log("this user has been deleted");
-            
+        dispatch(deleteUsersRequest(selectedIds));
+        dispatch(clearSelectedUsers());
+        if (currentUserID && selectedIds.includes(currentUserID)) {
+            navigate("/");
         }
-
     };
 
     return (

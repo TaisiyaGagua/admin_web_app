@@ -1,56 +1,63 @@
 import { takeEvery, put, call, all } from "redux-saga/effects";
-import { getUsersAsync, updateUser } from "../services/api_client";
-import { UpdateUserRequest } from "../dtos/requests/update_user_request";
+import {
+    deleteUserAsync,
+    getUsersAsync,
+    updateUserAsync,
+} from "../services/api_client";
+import { UpdateUserDto } from "../dtos/requests/update_user_dto";
 import { ApiResultWrapper } from "../common/api_result_wrapper";
 import { User } from "../dtos/user";
 import {
     blockUsersFailure,
-    blockUsersSuccess,
+    deleteUsersFailure,
     getUsersFailure,
     getUsersSuccess,
+    unblockUsersFailure,
+    updateLastLoginUserFailure,
+    updateLastLoginUserSuccess,
 } from "../state/users_state";
 
-function* blockUsers(action: {
+function* blockUser(action: {
     type: string;
     payload: string[];
 }): Generator<any, void, ApiResultWrapper<any>> {
     try {
         const userIds = action.payload;
-
-        // Create an array of promises for blocking users
-        const payload = { status: "Blocked" } as UpdateUserRequest;
+        const payload = { status: "Blocked" } as UpdateUserDto;
         const blockPromises = userIds.map((userId) =>
-            call(updateUser, userId, payload)
+            call(updateUserAsync, userId, payload)
         );
 
-        // Wait for all promises to resolve
         yield all(blockPromises);
+        const response = yield call(getUsersAsync);
 
-        yield put(blockUsersSuccess(userIds));
+        yield put(getUsersSuccess(response.data));
     } catch (error) {
-        // Dispatch a failure action
         yield put(blockUsersFailure(error as string));
     }
 }
 
-// function* unblockUser(action: { type: string; payload: string[] }) {
-//     try {
-//         const userIds = action.payload;
+function* unblockUser(action: {
+    type: string;
+    payload: string[];
+}): Generator<any, void, ApiResultWrapper<User[]>> {
+    try {
+        const userIds = action.payload;
 
-//         const payload = { status: "Active" } as UpdateUserRequest;
-//         const unblockPromises = userIds.map((userId) =>
-//             call(updateUser, userId, payload)
-//         );
+        const payload = { status: "Active" } as UpdateUserDto;
+        const unblockPromises = userIds.map((userId) =>
+            call(updateUserAsync, userId, payload)
+        );
 
-//         yield all(unblockPromises);
+        yield all(unblockPromises);
+        const response = yield call(getUsersAsync);
+        yield put(getUsersSuccess(response.data));
+    } catch (error) {
+        yield put(unblockUsersFailure(error as string));
+    }
+}
 
-//         yield put(unblockUsersSuccess(userIds));
-//     } catch (error) {
-//         yield put(unblockUsersFailure(error as string));
-//     }
-// }
-
-function* getUsers(action: {
+function* getUser(action: {
     type: string;
     payload: string[];
 }): Generator<any, void, ApiResultWrapper<User[]>> {
@@ -62,8 +69,51 @@ function* getUsers(action: {
     }
 }
 
+function* deleteUser(action: {
+    type: string;
+    payload: string[];
+}): Generator<any, void, any> {
+    try {
+        const userIds = action.payload;
+
+        const deletePromises = userIds.map((userId) =>
+            call(deleteUserAsync, userId)
+        );
+
+        yield all(deletePromises);
+
+        const response = yield call(getUsersAsync);
+        yield put(getUsersSuccess(response.data));
+    } catch (error) {
+        yield put(deleteUsersFailure(error as string));
+    }
+}
+
+function* updateLastLoginUser(action: {
+    type: string;
+    payload: string;
+}): Generator<any, void, ApiResultWrapper<any>> {
+    let response: ApiResultWrapper<any> = {
+        data: undefined,
+        error: undefined,
+    };
+    try {
+        let newLastLogin: Date = new Date();
+
+        const payload = { lastLogin: newLastLogin } as UpdateUserDto;
+
+        response = yield call(updateUserAsync, action.payload, payload);
+
+        yield put(updateLastLoginUserSuccess(response.data));
+    } catch {
+        yield put(updateLastLoginUserFailure(response.error));
+    }
+}
+
 export function* userSaga() {
-    yield takeEvery("users/blockUsersRequest", blockUsers);
-    //yield takeEvery("users/unblockUsersRequest", unblockUser);
-    yield takeEvery("users/getUsersRequest", getUsers);
+    yield takeEvery("users/blockUsersRequest", blockUser);
+    yield takeEvery("users/unblockUsersRequest", unblockUser);
+    yield takeEvery("users/getUsersRequest", getUser);
+    yield takeEvery("users/deleteUsersRequest", deleteUser);
+    yield takeEvery("users/updateLastLoginUserRequest", updateLastLoginUser);
 }

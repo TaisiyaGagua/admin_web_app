@@ -11,19 +11,41 @@ const usersSlice = createSlice({
         getUsersSuccess: (state, action) => {
             state.splice(0, state.length, ...action.payload);
         },
-        getUsersFailure: (state, action) => {
-            let a = 1;
-        },
-        blockUsersRequest: () => {},
+        getUsersFailure: (state, action) => {},
+        blockUsersRequest: (state, action) => {},
         blockUsersSuccess: (state, action) => {
             state.splice(0, state.length, ...action.payload);
-
         },
         blockUsersFailure: (state, action) => {},
+        unblockUsersRequest: (state, action) => {},
+        unblockUsersSuccess: (state, action) => {
+            state.splice(0, state.length, ...action.payload);
+        },
+        unblockUsersFailure: (state, action) => {},
+        deleteUsersRequest: (state, action) => {},
+        deleteUsersSuccess: (state, action) => {
+            state.splice(0, state.length, ...action.payload);
+        },
+        deleteUsersFailure: (state, action) => {},
+
+        updateLastLoginUserRequest: (state, action) => {},
+        updateLastLoginUserSuccess: (state, action) => {
+            state.splice(0, state.length, ...action.payload);
+        },
+        updateLastLoginUserFailure: (state, action) => {},
     },
 });
 
 export const {
+    updateLastLoginUserRequest,
+    updateLastLoginUserSuccess,
+    updateLastLoginUserFailure,
+    deleteUsersRequest,
+    deleteUsersSuccess,
+    deleteUsersFailure,
+    unblockUsersRequest,
+    unblockUsersSuccess,
+    unblockUsersFailure,
     blockUsersRequest,
     blockUsersSuccess,
     blockUsersFailure,

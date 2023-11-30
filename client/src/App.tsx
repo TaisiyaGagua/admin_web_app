@@ -10,7 +10,6 @@ import Header from "./components/header";
 const App: React.FC = () => {
     localStorage.setItem("isAuthenticated", "false");
 
-    const [selectedUsers, setSelectedUsers] = useState<string[]>([]);
     const [isRegistrationPage, setIsRegistrationPage] = useState(true);
 
     return (
@@ -65,13 +64,8 @@ const App: React.FC = () => {
                                 <div className="header_custom">
                                     <Header></Header>
                                 </div>
-                                <UserActions
-                                    selectedUsers={selectedUsers}
-                                ></UserActions>{" "}
-                                <ShowUsersTable
-                                    selectedUsers={selectedUsers}
-                                    setSelectedUsers={setSelectedUsers}
-                                ></ShowUsersTable>
+                                <UserActions /> 
+                                <ShowUsersTable />
                             </div>
                         }
                     ></Route>

@@ -3,6 +3,6 @@
 	"getUsersEndpoint": "record/userslist",
 	"checkEndpoint": "record/check",
 	"updateUserEndpoint": "users/{userId}",
-	"deleteEndpoint": "{usernameToDelete}",
+	"deleteEndpoint": "{userId}",
 	"addUserEndpoint": "record/add"
 }

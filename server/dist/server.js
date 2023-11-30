@@ -17,7 +17,7 @@ const conn_1 = require("./db/conn");
 const mongodb_1 = require("mongodb");
 const app = (0, express_1.default)();
 const cors = require("cors");
-require("dotenv").config({ path: "./config.env" });
+require("dotenv").config({ path: "./.env" });
 const port = process.env.PORT || 5001;
 app.use(cors());
 app.use(express_1.default.json());
@@ -34,23 +34,32 @@ app.post("/record/add", (req, res) => __awaiter(void 0, void 0, void 0, function
         status: req.body.status,
         password: req.body.password,
     };
-    let insertResult = yield db_connect.collection("Users").insertOne(myobj);
+    let insertResult = yield db_connect.collection("users").insertOne(myobj);
     res.send(insertResult);
 }));
 app.post("/record/check", (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     let db_connect = yield (0, conn_1.getDbObject)();
     let { email, password } = req.body;
-    let found = yield db_connect.collection("Users").findOne({ email });
+    let found = yield db_connect.collection("users").findOne({ email });
     if (!found) {
         res.json({ success: false, message: "User not found" });
     }
     else {
         if (found.password === password) {
-            res.json({
-                success: true,
-                message: "Login successful",
-                username: found.username,
-            });
+            if (found.status == "Active") {
+                res.json({
+                    success: true,
+                    message: "Login successful",
+                    username: found.username,
+                    id: found._id,
+                });
+            }
+            else {
+                res.json({
+                    success: false,
+                    message: "Your account is blocked.If you think this happened by mistake, please contact administrator: gagya@mail.ru",
+                });
+            }
         }
         else {
             res.json({ success: false, message: "Incorrect password" });
@@ -61,7 +70,7 @@ app.get("/record/userslist", (_, res) => __awaiter(void 0, void 0, void 0, funct
     try {
         let db_connect = yield (0, conn_1.getDbObject)();
         const users = yield db_connect
-            .collection("Users")
+            .collection("users")
             .find({})
             .toArray();
         res.json(users);
@@ -71,24 +80,41 @@ app.get("/record/userslist", (_, res) => __awaiter(void 0, void 0, void 0, funct
         res.status(500).json({ error: "Ошибка при получении данных" });
     }
 }));
-app.delete("/:username", (req, response) => __awaiter(void 0, void 0, void 0, function* () {
+app.delete("/:id", (req, response) => __awaiter(void 0, void 0, void 0, function* () {
     let db_connect = yield (0, conn_1.getDbObject)();
-    let username = req.params.username;
-    let myquery = { username: username };
-    const result = yield db_connect.collection("Users").deleteOne(myquery);
+    let id = new mongodb_1.ObjectId(req.params.id);
+    const result = yield db_connect.collection("users").deleteOne({ _id: id });
     response.json(result);
 }));
 app.patch("/users/:id", (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         let db_connect = yield (0, conn_1.getDbObject)();
-        let id = req.params.id;
-        let payload = req.body;
-        const filter = { _id: new mongodb_1.ObjectId(id) };
-        const updateDocument = payload;
-        const updateResult = yield db_connect
-            .collection("Users")
-            .updateOne(filter, updateDocument);
-        res.json(updateResult);
+        let id = new mongodb_1.ObjectId(req.params.id);
+        let updatedStatus = req.body.status;
+        let updatedLastLogin = req.body.lastLogin;
+        if (updatedStatus) {
+            const updateResult = yield db_connect
+                .collection("users")
+                .findOneAndUpdate({ _id: id }, { $set: { status: updatedStatus } });
+            if (updateResult) {
+                res.status(200).json({
+                    message: "User status successesfully updated",
+                });
+            }
+        }
+        else if (updatedLastLogin) {
+            const updateResult = yield db_connect
+                .collection("users")
+                .findOneAndUpdate({ _id: id }, { $set: { lastLogin: updatedLastLogin } });
+            if (updateResult) {
+                res.status(200).json({
+                    message: "User status successesfully updated",
+                });
+            }
+        }
+        else {
+            res.status(404).json({ message: "User not found" });
+        }
     }
     catch (err) {
         console.error(err);

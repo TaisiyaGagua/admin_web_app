@@ -1,4 +1,4 @@
-export type UpdateUserRequest = {
+export type UpdateUserDto = {
     username?: string | undefined;
     email?: string | undefined;
     lastLogin?: Date | undefined;

@@ -2,9 +2,11 @@ import axios, { AxiosHeaders, RawAxiosRequestHeaders } from "axios";
 import { ApiResultWrapper } from "../common/api_result_wrapper";
 import config from "../config.json";
 import { User } from "../dtos/user";
-import { CheckUserRequest } from "../dtos/requests/check_user_request";
+import { CheckUserDto } from "../dtos/requests/check_user_dto";
 import { CheckUserResponse } from "../dtos/responses/check_user_response";
-import { UpdateUserRequest } from "../dtos/requests/update_user_request";
+import { UpdateUserDto } from "../dtos/requests/update_user_dto";
+import { CreateUserDto } from "../dtos/requests/create_user_dto";
+import { UserResponseDto } from "../dtos/responses/user_response_dto";
 
 const baseUrl = config.backendBaseUrl;
 const headers: RawAxiosRequestHeaders | AxiosHeaders = {
@@ -15,14 +17,13 @@ export async function getUsersAsync(): Promise<ApiResultWrapper<User[]>> {
     const url = baseUrl + "/" + config.getUsersEndpoint;
 
     try {
-        const response = await axios.get<User[]>(url, {
+        const response = await axios.get<UserResponseDto[]>(url, {
             headers,
         });
 
-        console.log(JSON.stringify(response));
-
         const usersWithDateObjects = response.data.map((user) => ({
             ...user,
+            id: user._id,
             lastLogin: new Date(user.lastLogin),
         }));
 
@@ -42,16 +43,13 @@ export async function getUsersAsync(): Promise<ApiResultWrapper<User[]>> {
     }
 }
 
-export async function createUser(
-    userToCreate: User
+export async function createUserAsync(
+    userToCreate: CreateUserDto
 ): Promise<ApiResultWrapper<any>> {
     const url = baseUrl + "/" + config.addUserEndpoint;
 
     try {
         const response = await axios.post(url, userToCreate, { headers });
-
-        console.log(JSON.stringify(response));
-
         const result: ApiResultWrapper<any> = {
             data: response.data,
             error: undefined,
@@ -68,16 +66,14 @@ export async function createUser(
     }
 }
 
-export async function checkUser(
-    payload: CheckUserRequest
+export async function checkUserAsync(
+    payload: CheckUserDto
 ): Promise<ApiResultWrapper<CheckUserResponse>> {
     const url = baseUrl + "/" + config.checkEndpoint;
 
     try {
         const response = await axios.post(url, payload, { headers });
 
-        console.log(JSON.stringify(response));
-
         const result: ApiResultWrapper<CheckUserResponse> = {
             data: response.data,
             error: undefined,
@@ -94,17 +90,15 @@ export async function checkUser(
     }
 }
 
-export async function updateUser(
+export async function updateUserAsync(
     userId: string,
-    payload: UpdateUserRequest
+    payload: UpdateUserDto
 ): Promise<ApiResultWrapper<any>> {
     let url = baseUrl + "/" + config.updateUserEndpoint;
     url = url.replace("{userId}", userId);
     try {
         const response = await axios.patch(url, payload, { headers });
 
-        console.log(JSON.stringify(response));
-
         const result: ApiResultWrapper<any> = {
             data: response.data,
             error: undefined,
@@ -121,14 +115,12 @@ export async function updateUser(
     }
 }
 
-
-export async function deleteUser(
-    payload: CheckUserRequest
-) {
-    const url = baseUrl + "/" + config.checkEndpoint;
+export async function deleteUserAsync(userId: string) {
+    let url = baseUrl + "/" + config.deleteEndpoint;
+    url = url.replace("{userId}", userId);
 
     try {
-        const response = await axios.post(url, payload, { headers });
+        const response = await axios.delete(url);
 
         console.log(JSON.stringify(response));
 

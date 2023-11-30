@@ -1,17 +1,20 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { checkUser } from "../services/api_client";
-import { CheckUserRequest } from "../dtos/requests/check_user_request";
+import { checkUserAsync } from "../services/api_client";
+import { CheckUserDto } from "../dtos/requests/check_user_dto";
+import { useDispatch } from "react-redux";
+import { updateLastLoginUserRequest } from "../state/users_state";
 
 const Auth: React.FC = () => {
-    const [email, setEmail] = useState("");
-    const [password, setPassword] = useState("");
+    const [email, setEmail] = useState<string>("");
+    const [password, setPassword] = useState<string>("");
     const navigate = useNavigate();
+    const dispatch = useDispatch();
 
     const handleLogin = async (email: string, password: string) => {
         try {
-            const payload = { email, password } as CheckUserRequest;
-            const response = await checkUser(payload);
+            const payload: CheckUserDto = { email, password };
+            const response = await checkUserAsync(payload);
 
             if (response.error || response.data?.success === false) {
                 window.alert(response.data?.message);
@@ -20,7 +23,11 @@ const Auth: React.FC = () => {
             if (response.data?.success) {
                 localStorage.setItem("isAuthenticated", "true");
                 localStorage.setItem("username", `${response.data.username}`);
+                if (response.data.id) {
+                    localStorage.setItem("currentUserID", response.data.id);
+                }
                 navigate("/authorised");
+                dispatch(updateLastLoginUserRequest(response.data.id));
             }
         } catch (error) {
             window.alert(error);
